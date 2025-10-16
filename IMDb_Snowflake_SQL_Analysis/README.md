@@ -1,4 +1,4 @@
-# IMDb Genre-Based Analysis with Snowflake  
+# IMDb Analytics in Snowflake — From Stage Creation to CTE Insights  
 
 This project demonstrates advanced SQL querying in **Snowflake**, focusing on analytical functions, CTEs (Common Table Expressions), and data curation using the **IMDb dataset**.  
 The dataset was uploaded to a Snowflake stage, cleaned, and analyzed to extract insights about movie performance across genres.
@@ -112,3 +112,4 @@ Radu Gheorghe / murda2k — aspiring data analyst / SQL developer
 
 ## LinkedIn Profile:
 https://www.linkedin.com/in/radu-gheorghe-a43704245/
+
