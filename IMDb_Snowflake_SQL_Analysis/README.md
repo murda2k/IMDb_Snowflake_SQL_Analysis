@@ -1,70 +1,67 @@
-# IMDb Movie Analytics with Snowflake & SQL
+# IMDb Genre-Based Analysis with Snowflake  
 
-##  Project Overview
-This project demonstrates how to load, clean, and analyze movie data in **Snowflake** using **SQL**.  
-It simulates a real-world workflow where raw CSV data is uploaded into a cloud warehouse, curated, and queried to extract business insights.
+This project demonstrates advanced SQL querying in **Snowflake**, focusing on analytical functions, CTEs (Common Table Expressions), and data curation using the **IMDb dataset**.  
+The dataset was uploaded to a Snowflake stage, cleaned, and analyzed to extract insights about movie performance across genres.
 
----
+## Project Structure  
 
-## Tech Stack
-- **Snowflake** – cloud data warehouse  
-- **SQL** – data cleaning, transformation, and analytics  
-- **CTEs** – modular query design  
-- **Window Functions** – ranking, averages, comparisons  
+- **`queries.sql`** — contains all SQL queries including:  
+  - Creating and managing tables and file formats  
+  - Removing duplicates with `SELECT DISTINCT`  
+  - Using `WITH` and CTEs for multi-step analysis  
+  - Applying window functions (`ROW_NUMBER`, `RANK`, `AVG`, `COUNT`)  
+  - Using `CASE WHEN` logic for performance labeling  
+  - Ordering and filtering results  
 
----
-
-## Steps & Logic
+## Example Queries  
 
 ### 1. Setup
-A warehouse (`PROJECT_WH`) and a resource monitor (3 daily credits) were created using the `ACCOUNTADMIN` role.  
+A warehouse (`PROJECT_WH`) and a resource monitor (`DAILY_LIMIT_3`) were created using the `ACCOUNTADMIN` role.  
 We used an existing database:  
 ```sql
 USE DATABASE IMDB_DB;
 USE SCHEMA PUBLIC;
-2. Stage Creation & File Upload
-The CSV file (IMDb_Dataset.csv) was uploaded to a Snowflake stage named @project.
+```
+#### Results:
+![wh creation](screenshots/create_wh.png)
+![rm creation](screenshots/RESOURCE_MONITOR.png)
 
-3. Table & File Format Creation
-sql
-Copy code
-CREATE TABLE MOVIES2 (
-  TITLE VARCHAR,
-  IMDB_RATING NUMBER,
-  YEAR NUMBER,
-  CERTIFICATES VARCHAR,
-  GENRE VARCHAR,
-  DIRECTOR VARCHAR,
-  STAR_CAST VARCHAR,
-  METASCORE NUMBER,
-  DURATION NUMBER
-);
+### 2. Stage creation and file upload
 
+The CSV file (`IMDb_Dataset.csv`) was uploaded to a Snowflake stage named `@project`.
+
+#### Results:
+![stage](screenshots/create_stage.png)
+
+### 3. Create file format and load data into table
+```sql
 CREATE FILE FORMAT PROJECT_MOVIES_CSV
 TYPE = 'CSV'
 FIELD_DELIMITER = ','
 SKIP_HEADER = 1
 FIELD_OPTIONALLY_ENCLOSED_BY = '"';
-4. Load Data into Table
-sql
-Copy code
+
 COPY INTO MOVIES2
 FROM @project
 files = ('IMDb_Dataset.csv')
 file_format = ( format_name=PROJECT_MOVIES_CSV );
-5. Clean Data (Remove Duplicates)
-sql
-Copy code
+```
+#### Results:
+![filef and copyinto](screenshots/table_movies2.png)
+
+### 3. Remove duplicates from the dataset  
+```sql
 CREATE TABLE MOVIES_CLEAN LIKE MOVIES2;
 
 INSERT INTO MOVIES_CLEAN
-SELECT DISTINCT * FROM MOVIES2;
-6. Analytical Query (CTE)
-We calculated average rating and total movies per genre,
-ranked movies within each genre, and used a CASE expression to classify performance.
+SELECT DISTINCT *
+FROM MOVIES2;
+```
+#### Results:
+A cleaned table with unique movie entries, ensuring accurate genre-based calculations.
 
-sql
-Copy code
+### 5. Combine genre statistics with ranked movies and classify performance
+```sql
 WITH genre_stats AS (
     SELECT 
         GENRE,
@@ -101,3 +98,17 @@ FROM ranked_movies r
 JOIN genre_stats g ON r.GENRE = g.GENRE
 WHERE r.row_num <= 3
 ORDER BY g.avg_rating DESC, r.GENRE, r.row_num;
+```
+#### Results:
+![ct results](screenshots/cte_results.png)
+
+## Tools Used:
+- Snowflake — SQL execution
+- Kaggle — Dataset source
+- GitHub — Project repository
+
+## Author:
+Radu Gheorghe / murda2k — aspiring data analyst / SQL developer
+
+## LinkedIn Profile:
+https://www.linkedin.com/in/radu-gheorghe-a43704245/
